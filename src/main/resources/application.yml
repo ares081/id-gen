@@ -1,0 +1,5 @@
+spring:
+    application:
+        name: id-gen
+    profiles:
+      active: local

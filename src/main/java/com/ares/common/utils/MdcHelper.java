@@ -1,14 +1,14 @@
 package com.ares.common.utils;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 import org.slf4j.MDC;
 
 public class MdcHelper {
 
-  public static <T> Callable<T> wrap(final Callable<T> callable,
-      final Map<String, String> context) {
+  public static <T> Callable<T> call(final Callable<T> callable) {
+    Map<String, String> context = MDC.getCopyOfContextMap();
     return () -> {
       Map<String, String> previous = MDC.getCopyOfContextMap();
       if (context == null || context.isEmpty()) {
@@ -30,7 +30,8 @@ public class MdcHelper {
   }
 
 
-  public static Runnable wrap(final Runnable runnable, final Map<String, String> context) {
+  public static Runnable run(final Runnable runnable) {
+    Map<String, String> context = MDC.getCopyOfContextMap();
     return () -> {
       Map<String, String> previous = MDC.getCopyOfContextMap();
       if (context == null || context.isEmpty()) {
@@ -50,11 +51,24 @@ public class MdcHelper {
     };
   }
 
-  public static <T> Collection<? extends Callable<T>> decorate(
-      final Collection<? extends Callable<T>> tasks) {
-    if (tasks == null) {
-      throw new NullPointerException();
-    }
-    return tasks.stream().map(task -> wrap(task, MDC.getCopyOfContextMap())).toList();
+  public static <T> Supplier<T> supplier(final Supplier<T> supplier) {
+    Map<String, String> context = MDC.getCopyOfContextMap();
+    return () -> {
+      Map<String, String> previous = MDC.getCopyOfContextMap();
+      if (context == null || context.isEmpty()) {
+        MDC.clear();
+      } else {
+        MDC.setContextMap(context);
+      }
+      try {
+        return supplier.get();
+      } finally {
+        if (previous == null) {
+          MDC.clear();
+        } else {
+          MDC.setContextMap(previous);
+        }
+      }
+    };
   }
 }

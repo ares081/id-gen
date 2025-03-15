@@ -99,6 +99,7 @@ public class RequestsLoggerAdvice {
       long end = System.currentTimeMillis();
       long cost = end - start;
       logger.info("end time:{} | cost :{}ms | result:{}", end, cost, gson.toJson(result));
+      MDC.remove(REQUEST_ID);
     }
     return result;
   }

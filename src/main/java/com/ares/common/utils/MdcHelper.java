@@ -53,7 +53,7 @@ public class MdcHelper {
     };
   }
 
-  // 下面两个类用于CompleteFuture提交任务
+  // 下面三个用于CompleteFuture提交任务
   public static <T> Supplier<T> supplier(final Supplier<T> supplier) {
     Map<String, String> context = MDC.getCopyOfContextMap();
     return () -> {

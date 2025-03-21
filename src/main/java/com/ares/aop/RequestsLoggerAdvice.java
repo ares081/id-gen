@@ -26,7 +26,7 @@ public class RequestsLoggerAdvice {
 
   private final Logger logger = LoggerFactory.getLogger(RequestsLoggerAdvice.class);
   private final Gson gson;
-  private final String REQUEST_ID = "requestId";
+  private final String TRACE_ID = "traceId";
 
   @Resource
   private SnowflakeService snowflakeService;
@@ -50,13 +50,13 @@ public class RequestsLoggerAdvice {
     HttpServletRequest request = requestAttributes.getRequest();
     String reqId = request.getRequestId();
     if (Strings.isNullOrEmpty(reqId) || Objects.equals(reqId, "0")) {
-      reqId = request.getHeader(REQUEST_ID);
+      reqId = request.getHeader(TRACE_ID);
     }
     if (Strings.isNullOrEmpty(reqId) || Objects.equals(reqId, "0")) {
       //todo 生成一个全局唯一的请求id
       reqId = Long.toString(snowflakeService.nextId());
     }
-    MDC.put(REQUEST_ID, reqId);
+    MDC.put(TRACE_ID, reqId);
 
     //通过请求获取url,ip
     String url = request.getRequestURL().toString();
@@ -99,7 +99,7 @@ public class RequestsLoggerAdvice {
       long end = System.currentTimeMillis();
       long cost = end - start;
       logger.info("end time:{} | cost :{}ms | result:{}", end, cost, gson.toJson(result));
-      MDC.remove(REQUEST_ID);
+      MDC.remove(TRACE_ID);
     }
     return result;
   }

@@ -3,17 +3,21 @@ package com.ares.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com.ares.domain.SnowflakeIdRecordEntity;
 import com.ares.domain.SnowflakeIdRecordRepository;
+import com.google.gson.Gson;
 import jakarta.annotation.PreDestroy;
 import jakarta.transaction.Transactional;
 
 @Service
 public class SnowflakeIdRecordService {
-
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final Gson gson;
   // 保存队列
   private final ConcurrentLinkedQueue<SnowflakeIdRecordEntity> saveQueue =
       new ConcurrentLinkedQueue<>();
@@ -25,7 +29,9 @@ public class SnowflakeIdRecordService {
 
 
   public SnowflakeIdRecordService(
+      Gson sndGson,
       SnowflakeIdRecordRepository snowflakeIdRecordRepository) {
+    this.gson = sndGson;
     this.snowflakeIdRecordRepository = snowflakeIdRecordRepository;
   }
 

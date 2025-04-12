@@ -1,14 +1,11 @@
-package com.ares.aop;
+package com.ares.config;
 
-import com.ares.service.snowflake.SnowflakeService;
-import com.google.common.base.Strings;
-import com.google.gson.Gson;
-import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -17,19 +14,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import com.google.gson.Gson;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Aspect
 @Component
 public class RequestsLoggerAdvice {
 
-  private final Logger logger = LoggerFactory.getLogger(RequestsLoggerAdvice.class);
+  private final Logger logger = LoggerFactory.getLogger("api");
   private final Gson gson;
   private final String TRACE_ID = "traceId";
-
-  @Resource
-  private SnowflakeService snowflakeService;
 
   public RequestsLoggerAdvice(Gson gson) {
     this.gson = gson;
@@ -37,28 +34,25 @@ public class RequestsLoggerAdvice {
 
 
   @Pointcut("execution(* com.*.controller.*.*(..))")
-  private void requestLogger() {
-  }
+  private void requestLogger() {}
 
   @Around("requestLogger()")
   public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
     long start = System.currentTimeMillis();
-    ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+    ServletRequestAttributes requestAttributes =
+        (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
     if (requestAttributes == null) {
       return joinPoint.proceed();
     }
     HttpServletRequest request = requestAttributes.getRequest();
-    String reqId = request.getRequestId();
-    if (Strings.isNullOrEmpty(reqId) || Objects.equals(reqId, "0")) {
-      reqId = request.getHeader(TRACE_ID);
-    }
-    if (Strings.isNullOrEmpty(reqId) || Objects.equals(reqId, "0")) {
-      //todo 生成一个全局唯一的请求id
-      reqId = Long.toString(snowflakeService.nextId());
+    String reqId = request.getHeader(TRACE_ID);
+
+    if (!StringUtils.hasText(reqId) || Objects.equals(reqId, "0")) {
+      reqId = getTraceId();
     }
     MDC.put(TRACE_ID, reqId);
 
-    //通过请求获取url,ip
+    // 通过请求获取url,ip
     String url = request.getRequestURL().toString();
     String remoteIp = getIpAddr(request);
 
@@ -71,13 +65,14 @@ public class RequestsLoggerAdvice {
       header.put(key, value);
     }
 
-    //获取方法所在的类名
+    // 获取方法所在的类名
     String className = joinPoint.getTarget().getClass().getName();
-    //获取方法名
+    // 获取方法名
     String methodName = joinPoint.getSignature().getName();
-    //获取参数名
-    String[] parameterNamesArgs = ((org.aspectj.lang.reflect.MethodSignature) joinPoint.getSignature()).getParameterNames();
-    //获取参数值
+    // 获取参数名
+    String[] parameterNamesArgs =
+        ((org.aspectj.lang.reflect.MethodSignature) joinPoint.getSignature()).getParameterNames();
+    // 获取参数值
     Object[] args = joinPoint.getArgs();
 
     joinPoint.getSignature().getDeclaringTypeName();
@@ -106,23 +101,36 @@ public class RequestsLoggerAdvice {
 
   private String getIpAddr(HttpServletRequest request) {
     String ipAddress = request.getHeader("x-forwarded-for");
-    if (Strings.isNullOrEmpty(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
+    if (!StringUtils.hasText(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
       ipAddress = request.getHeader("Proxy-Client-IP");
     }
-    if (Strings.isNullOrEmpty(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
+    if (!StringUtils.hasText(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
       ipAddress = request.getHeader("WL-Proxy-Client-IP");
     }
-    if (Strings.isNullOrEmpty(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
+    if (!StringUtils.hasText(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
       ipAddress = request.getRemoteAddr();
     }
     // 对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
-    if (!Strings.isNullOrEmpty(ipAddress) && ipAddress.length() > 15) {
+    if (!StringUtils.hasText(ipAddress) && ipAddress.length() > 15) {
       if (ipAddress.indexOf(",") > 0) {
         ipAddress = ipAddress.substring(0, ipAddress.indexOf(","));
       }
     }
     // 或者这样也行,对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
     return ipAddress;
+  }
+
+  private String getTraceId() {
+    UUID uuid = UUID.randomUUID();
+    long l = uuid.getMostSignificantBits() >>> 26; // 取高24位
+    String id = String.valueOf(l);
+
+    if (id.length() > 6) {
+      id = id.substring(0, 6);
+    } else if (id.length() < 6) {
+      id = String.format("%0" + 6 + "d", Long.parseLong(id));
+    }
+    return Instant.now().toEpochMilli() + id;
   }
 
 }

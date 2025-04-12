@@ -1,36 +1,53 @@
 package com.ares.controller;
 
-import com.ares.common.Response;
-import com.ares.service.snowflake.SnowflakeService;
-import jakarta.annotation.Resource;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.ares.model.Response;
+import com.ares.service.SnowflakeIdGeneratorService;
+
 
 
 @RestController
-@RequestMapping("/idgen")
+@RequestMapping("/v1/idgen")
 public class IdGenController {
 
-  @Resource
-  private SnowflakeService snowflakeService;
+  private final SnowflakeIdGeneratorService snowflakeIdGeneratorService;
 
-  @RequestMapping
-  public Response<Object> next() {
-    Long id = snowflakeService.nextId();
-    Map<String, Long> map = new HashMap<>();
-    map.put("id", id);
-    return new Response<>(0, map);
+
+  IdGenController(SnowflakeIdGeneratorService snowflakeIdGeneratorService) {
+    this.snowflakeIdGeneratorService = snowflakeIdGeneratorService;
   }
 
-  @PostMapping
-  public Response<Object> nextPost(@RequestBody Map<String, Object> body) {
-    Long id = snowflakeService.nextId();
+  @GetMapping("/{bizType}")
+  public Response<Object> generateIdForBizType(@PathVariable String bizType) {
+    Long id = snowflakeIdGeneratorService.generateIdForBizType(bizType);
     Map<String, Long> map = new HashMap<>();
     map.put("id", id);
-    return new Response<>(0, map);
+    return Response.ok(map);
   }
+
+  @GetMapping
+  public Response<Object> generateId() {
+    Long id = snowflakeIdGeneratorService.generateId();
+    Map<String, Long> map = new HashMap<>();
+    map.put("id", id);
+    return Response.ok(map);
+  }
+
+  @GetMapping("/batch/{bizType}/{count}")
+  public Response<Object> getMethodName(@PathVariable String bizType, @PathVariable Integer count) {
+    if (count == null) {
+      count = 3;
+    }
+    List<Long> ids = snowflakeIdGeneratorService.generateBatchIds(bizType, count);
+    Map<String, List<Long>> map = new HashMap<>();
+    map.put("ids", ids);
+    return Response.ok(map);
+  }
+
 }

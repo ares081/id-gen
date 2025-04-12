@@ -1,4 +1,4 @@
-package com.ares.common.utils;
+package com.ares.common;
 
 import java.util.Map;
 import java.util.concurrent.Callable;

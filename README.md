@@ -1,5 +1,5 @@
-[TOC]
-spring-boot web 自用模板：
+id生成服务：
+spring-boot3 + jdk17 + jpa
 
 ## 实现功能
 

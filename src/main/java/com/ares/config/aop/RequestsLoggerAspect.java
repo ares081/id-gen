@@ -1,4 +1,4 @@
-package com.ares.config;
+package com.ares.config.aop;
 
 import java.time.Instant;
 import java.util.Enumeration;
@@ -22,13 +22,13 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @Aspect
 @Component
-public class RequestsLoggerAdvice {
+public class RequestsLoggerAspect {
 
   private final Logger logger = LoggerFactory.getLogger("api");
   private final Gson gson;
   private final String TRACE_ID = "traceId";
 
-  public RequestsLoggerAdvice(Gson gson) {
+  public RequestsLoggerAspect(Gson gson) {
     this.gson = gson;
   }
 
@@ -89,7 +89,7 @@ public class RequestsLoggerAdvice {
           start, remoteIp, url, className, methodName, gson.toJson(params), gson.toJson(header));
       result = joinPoint.proceed();
     } catch (Exception e) {
-      logger.error("请求日志记录异常", e);
+      throw e;
     } finally {
       long end = System.currentTimeMillis();
       long cost = end - start;

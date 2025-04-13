@@ -7,3 +7,15 @@ spring-boot3 + jdk17 + jpa
 * logback日志配置
 * snowflake生成id
 * 按业务持久化
+* 集成限流
+  + gauva
+  + redis
+  + resilience4j
+  + SlidingWindowRateLimiter(自定义)
+
+## TODO
+
+### 限流扩展
+
+* 多维度规则：(IP/userId/)
+* 配置热加载

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.ares.factory.ratelimit.RateLimit;
+import com.ares.factory.ratelimit.RateLimiterType;
 import com.ares.model.Response;
 import com.ares.service.SnowflakeIdGeneratorService;
 
@@ -31,6 +33,7 @@ public class IdGenController {
     return Response.ok(map);
   }
 
+  @RateLimit(type = RateLimiterType.SLIDING_WINDOW)
   @GetMapping
   public Response<Object> generateId() {
     Long id = snowflakeIdGeneratorService.generateId();

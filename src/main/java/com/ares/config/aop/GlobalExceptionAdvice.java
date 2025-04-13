@@ -1,4 +1,4 @@
-package com.ares.config;
+package com.ares.config.aop;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,13 +9,13 @@ import com.ares.model.Response;
 import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionAdvice {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @ExceptionHandler(value = Exception.class)
   @ResponseBody
   public Response<Object> exceptionHandler(HttpServletRequest req, Exception e) {
     logger.error("Exception: error msg: {}", e.getMessage());
-    return Response.failed(Response.FAILED_CODE, "处理异常");
+    return Response.failed(Response.FAILED_CODE, e.getMessage());
   }
 }

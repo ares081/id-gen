@@ -25,6 +25,7 @@ public class IdGenController {
     this.snowflakeIdGeneratorService = snowflakeIdGeneratorService;
   }
 
+  @RateLimit(type = RateLimiterType.SLIDING_WINDOW)
   @GetMapping("/{bizType}")
   public Response<Object> generateIdForBizType(@PathVariable String bizType) {
     Long id = snowflakeIdGeneratorService.generateIdForBizType(bizType);

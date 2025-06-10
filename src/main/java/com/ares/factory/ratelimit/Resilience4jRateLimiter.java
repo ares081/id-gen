@@ -33,5 +33,4 @@ public class Resilience4jRateLimiter implements CustomerRateLimiter {
     });
     return rateLimiter.acquirePermission();
   }
-
 }

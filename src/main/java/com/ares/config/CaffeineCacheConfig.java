@@ -44,6 +44,4 @@ public class CaffeineCacheConfig {
     cacheManager.setCacheNames(Arrays.asList("generatorCache", "stateCache"));
     return cacheManager;
   }
-
-
 }

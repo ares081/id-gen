@@ -26,8 +26,6 @@ public class RateLimitAspect {
     this.rateLimiterFactory = rateLimiterFactory;
   }
 
-
-
   @Around("@annotation(com.ares.factory.ratelimit.RateLimit)")
   public Object rateLimit(ProceedingJoinPoint point) throws Throwable {
 

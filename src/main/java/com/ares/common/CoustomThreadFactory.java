@@ -2,6 +2,7 @@ package com.ares.common;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,7 @@ public class CoustomThreadFactory implements ThreadFactory {
   }
 
   @Override
-  public Thread newThread(Runnable runnable) {
+  public Thread newThread(@NotNull Runnable runnable) {
     Thread thread = new Thread(group, runnable, prefix + "-" + threadNumber.getAndIncrement());
     if (thread.isDaemon()) {
       thread.setDaemon(false);
@@ -30,7 +31,7 @@ public class CoustomThreadFactory implements ThreadFactory {
 
     // 设置未捕获异常处理器
     thread.setUncaughtExceptionHandler((t, e) -> {
-      logger.error("Thread: {}, threw exception: {}", t.getName(), e.getCause());
+      logger.error("Thread: {}, threw exception:", t.getName(), e.getCause());
     });
 
     // 记录创建的线程数量

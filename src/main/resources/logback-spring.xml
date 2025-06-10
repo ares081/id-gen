@@ -17,9 +17,8 @@
   <property name="ERROR_LOG" value="${PROJECT_NAME}-error"/>
 
   <!-- 定义日志格式-->
-  <property name="API_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} ${PROJECT_NAME} host:${hostname} %X{traceId} %thread %-5level %logger{50}: %msg%n"/>
-  <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} ${PROJECT_NAME} %X{traceId} %thread %-5level %logger{50}: %msg%n"/>
-
+  <property name="LOG_PATTERN"
+    value="%d{yyyy-MM-dd HH:mm:ss.SSS} ${PROJECT_NAME} ${hostname} %X{traceId} %thread %-5level %logger{36}:%msg%n"/>
 
   <!-- 控制台输出 -->
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -49,7 +48,7 @@
     <file>${LOG_PATH}/${API_LOG}.log</file>
     <filter class="ch.qos.logback.classic.filter.LevelFilter" level="INFO"/>
     <encoder>
-      <pattern>${API_LOG_PATTERN}</pattern>
+      <pattern>${LOG_PATTERN}</pattern>
       <charset>UTF-8</charset>
     </encoder>
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">

@@ -85,7 +85,7 @@ public class RequestsLoggerAspect {
     Object result = null;
     try {
       logger.info(
-          "start time:{} | remote ip:{} | url:{} | class:{} | func :{} | params:{} | header:{}",
+          "start:{} | remote ip:{} | url:{} | class:{} | func :{} | params:{} | header:{}",
           start, remoteIp, url, className, methodName, gson.toJson(params), gson.toJson(header));
       result = joinPoint.proceed();
     } catch (Exception e) {
@@ -93,7 +93,7 @@ public class RequestsLoggerAspect {
     } finally {
       long end = System.currentTimeMillis();
       long cost = end - start;
-      logger.info("end time:{} | cost :{}ms | result:{}", end, cost, gson.toJson(result));
+      logger.info("end:{} | cost :{}ms | result:{}", end, cost, gson.toJson(result));
       MDC.remove(TRACE_ID);
     }
     return result;

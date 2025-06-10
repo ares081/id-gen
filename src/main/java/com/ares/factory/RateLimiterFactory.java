@@ -49,33 +49,21 @@ public class RateLimiterFactory {
         int permits = apiConfig.getPermits() > 0 ? apiConfig.getPermits() : rateLimit.permits();
         int timeWindow = apiConfig.getTimeWindowSeconds() > 0 ? apiConfig.getTimeWindowSeconds()
             : (int) rateLimit.timeUnit().toSeconds(rateLimit.timeWindow());
-        switch (type) {
-          case GUAVA:
-            return createGuavaRateLimiter(permits, timeWindow);
-          case REDIS:
-            return createRedisRateLimiter(permits, timeWindow);
-          case RESILIENCE4J:
-            return createResilience4jRateLimiter(permits, timeWindow);
-          case SLIDING_WINDOW:
-            return createSlidingWindowRateLimiter(permits, timeWindow);
-          default:
-            return createGuavaRateLimiter(permits, timeWindow);
-        }
+        return switch (type) {
+          case REDIS -> createRedisRateLimiter(permits, timeWindow);
+          case RESILIENCE4J -> createResilience4jRateLimiter(permits, timeWindow);
+          case SLIDING_WINDOW -> createSlidingWindowRateLimiter(permits, timeWindow);
+          default -> createGuavaRateLimiter(permits, timeWindow);
+        };
       }
 
       // 否则使用注解上的配置
-      switch (type) {
-        case GUAVA:
-          return createGuavaRateLimiter(rateLimit);
-        case REDIS:
-          return createRedisRateLimiter(rateLimit);
-        case RESILIENCE4J:
-          return createResilience4jRateLimiter(rateLimit);
-        case SLIDING_WINDOW:
-          return createSlidingWindowRateLimiter(rateLimit);
-        default:
-          return createGuavaRateLimiter(rateLimit);
-      }
+      return switch (type) {
+        case REDIS -> createRedisRateLimiter(rateLimit);
+        case RESILIENCE4J -> createResilience4jRateLimiter(rateLimit);
+        case SLIDING_WINDOW -> createSlidingWindowRateLimiter(rateLimit);
+        default -> createGuavaRateLimiter(rateLimit);
+      };
     });
   }
 
@@ -102,18 +90,12 @@ public class RateLimiterFactory {
         timeWindow = apiConfig.getTimeWindowSeconds();
       }
     }
-    switch (type) {
-      case GUAVA:
-        return createGuavaRateLimiter(permits, timeWindow);
-      case REDIS:
-        return createRedisRateLimiter(permits, timeWindow);
-      case RESILIENCE4J:
-        return createResilience4jRateLimiter(permits, timeWindow);
-      case SLIDING_WINDOW:
-        return createSlidingWindowRateLimiter(permits, timeWindow);
-      default:
-        return createGuavaRateLimiter(permits, timeWindow);
-    }
+    return switch (type) {
+      case REDIS -> createRedisRateLimiter(permits, timeWindow);
+      case RESILIENCE4J -> createResilience4jRateLimiter(permits, timeWindow);
+      case SLIDING_WINDOW -> createSlidingWindowRateLimiter(permits, timeWindow);
+      default -> createGuavaRateLimiter(permits, timeWindow);
+    };
   }
 
   private CustomerRateLimiter createGuavaRateLimiter(RateLimit rateLimit) {
@@ -176,5 +158,4 @@ public class RateLimiterFactory {
       timeWindowInSeconds = 1; // 防止除零
     return (double) rateLimit.permits() / timeWindowInSeconds;
   }
-
 }
